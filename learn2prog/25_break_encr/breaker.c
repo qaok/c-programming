@@ -1,0 +1,54 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+
+size_t max(int * letters, size_t n) {
+  int maxCount = letters[0];
+  int maxElementIndex = 0;
+  // 确定哪个字母出现次数最多
+  for (size_t i = 1; i < n; i++) {
+    if (letters[i] > maxCount) {
+      maxCount = letters[i];
+      maxElementIndex = i;
+    }
+  }
+  return maxElementIndex;
+}
+
+int decrypt(FILE * f) {
+  int c;
+  int letters[26] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+  while ((c = fgetc(f)) != EOF) {
+    if (isalpha(c)) {
+      c = tolower(c);
+      c -= 'a';
+      letters[c] = letters[c] + 1; // 统计每个位置的字母数量
+    }
+  }
+
+  size_t maxElement = max(letters, 26);
+  int ans;
+
+  if (maxElement >= 4) {  // 此处即为确定e字母的移位
+    ans = maxElement - 4;
+  } else {
+    ans = 26 - (4 - maxElement);
+  }
+  return ans;   // 确定字母移位值
+}
+
+int main(int argc, char ** argv) {
+  if (argc != 2) {
+    fprintf(stderr,"Usage: breaker inputFileName\n");
+    return EXIT_FAILURE;
+  }
+
+  FILE * f = fopen(argv[1], "r");
+  if (f == NULL) {
+    perror("Could not open file");
+    return EXIT_FAILURE;
+  }
+  size_t key = decrypt(f);
+  printf("%d\n", key);
+  return EXIT_SUCCESS;
+}
